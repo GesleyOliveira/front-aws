@@ -1,0 +1,97 @@
+ipInstânciaApi: 54.158.252.247
+PublicDNS: ec2-54-158-252-247.compute-1.amazonaws.com
+
+git clone https://github.com/JoaoLucasMdO/api-aws.git
+
+Ubuntu: ssh -i labsuser.pem ubuntu@ec2-3-82-198-120.compute-1.amazonaws.com
+back amazon: ssh -i labsuser.pem  ec2-user@ec2-54-146-126-47.compute-1.amazonaws.com
+front amazon: ssh -i labsuser.pem  ec2-user@ec2-52-207-165-97.compute-1.amazonaws.com
+
+ubuntu:
+primeiro: sudo apt update
+
+install npm e node: sudo apt install -y nodejs npm
+
+install pm2: sudo npm install -g pm2
+
+amazon:
+primeiro: sudo yum update
+
+install npm e node: sudo yum install -y nodejs npm
+
+install pm2: sudo npm install -g pm2
+
+install git: sudo npm install git
+
+MongoDB:
+curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | sudo gpg --dearmor -o /usr/share/keyrings/mongodb-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/mongodb-archive-keyring.gpg] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+
+sudo apt update
+sudo apt install -y mongodb-org
+
+db.createUser({
+  user: "gesley",
+  pwd: "ge12",
+  roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" 
+]
+ })
+
+mongosh -u joao -p joao123 --authenticationDatabase admin
+
+urlMongo: mongodb://joao:joao123@18.206.157.26:27017/admin?authSource=admin
+
+cd api-aws
+
+nano .env
+
+MONGO_URI=mongodb://gesley:ge12@3.229.250.23:27017/admin?authSource=admin
+CNN_MYSQL_DB_HOST="produto-p2.cowvjahc7a1r.us-east-1.rds.amazonaws.com"
+CNN_MYSQL_DB_USER="admin"
+CNN_MYSQL_DB_PASSWORD="Gelao*123"
+CNN_MYSQL_DB_NAME="awsP2"
+CNN_MYSQL_DB_PORT="3306"
+REGION="us-east-1"
+LOG_GROUP_NAME="ra3011392313008"
+LOG_STREAM_NAME="3011392313008stream"
+BUCKET_NAME="ra-3011392313008-01"
+
+
+pm2 start serve.js
+
+http://13.220.153.251:3000/swagger
+
+FRONT:
+
+server {
+    listen 80;
+    server_name dsm-ges-front.duckdns.org;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+ }
+
+BACK:
+
+ server {
+    listen 80;
+    server_name dsm-ges-back.duckdns.org;
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+ }
+
+Entrar no EC2 Front: docker start front-aws
+Entrar no EC2 Back: cd api-aws 
+
+depois: pm2 start server.js
