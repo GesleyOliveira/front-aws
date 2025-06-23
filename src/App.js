@@ -4,7 +4,7 @@ import axios from 'axios';
 const API_URL = 'http://54.146.126.47'; // ajuste se necessário
 
 export default function App() {
-  
+
   // Usuários
   const [usuarios, setUsuarios] = useState([]);
   const [nome, setNome] = useState('');
@@ -161,9 +161,9 @@ export default function App() {
               <table className="min-w-full bg-white rounded shadow">
                 <thead>
                   <tr className="bg-blue-100">
-                    <th className="py-2 px-3 text-left">Nome</th>
-                    <th className="py-2 px-3 text-left">Email</th>
-                    <th className="py-2 px-3 text-left">Ações</th>
+                    <th className="py-2 px-3 text-left">Nome:</th>
+                    <th className="py-2 px-3 text-left">Email:</th>
+                    <th className="py-2 px-3 text-left">Ações:</th>
                   </tr>
                 </thead>
                 <tbody>
