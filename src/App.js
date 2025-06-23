@@ -4,6 +4,7 @@ import axios from 'axios';
 const API_URL = 'http://54.146.126.47'; // ajuste se necessário
 
 export default function App() {
+  
   // Usuários
   const [usuarios, setUsuarios] = useState([]);
   const [nome, setNome] = useState('');
