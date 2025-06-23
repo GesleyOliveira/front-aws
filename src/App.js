@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Button, Table, Form, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col } from 'react-bootstrap';
 import UserTable from './UserTable';
 import ProductTable from './ProductTable';
 import S3Uploader from './S3Uploader';
@@ -10,21 +10,21 @@ function App() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Fetch users and products from backend
-    async function fetchData() {
-      try {
-        const userResponse = await axios.get('http://44.201.171.2:3000/usuarios');
-        const productResponse = await axios.get('http://44.201.171.2:3000/produtos');
-        setUsers(userResponse.data);
-        setProducts(productResponse.data);
-      } catch (error) {
-        console.error('Erro ao buscar dados:', error);
-      } finally {
-        setLoading(false);
-      }
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const userResponse = await axios.get('http://44.201.171.2:3000/usuarios');
+      const productResponse = await axios.get('http://44.201.171.2:3000/produtos');
+      setUsers(userResponse.data);
+      setProducts(productResponse.data);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    } finally {
+      setLoading(false);
     }
-//ajuste
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -33,14 +33,14 @@ function App() {
       <Row className="mt-3">
         <Col>
           <h2>Usuários</h2>
-          <UserTable users={users} loading={loading} />
+          <UserTable users={users} loading={loading} onRefresh={fetchData} />
         </Col>
       </Row>
 
       <Row className="mt-3">
         <Col>
           <h2>Produtos</h2>
-          <ProductTable products={products} loading={loading} />
+          <ProductTable products={products} loading={loading} onRefresh={fetchData} />
         </Col>
       </Row>
 
