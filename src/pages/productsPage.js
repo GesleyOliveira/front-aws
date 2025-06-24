@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../front-aws-main/src/services/api';
+import api from '../services/api';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
