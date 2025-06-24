@@ -92,6 +92,8 @@ BACK:
  }
 
 Entrar no EC2 Front: docker start front-aws
+No site: http://52.207.165.97/
+
 Entrar no EC2 Back: cd api-aws 
 
 depois: pm2 start server.js
