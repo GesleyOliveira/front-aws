@@ -1,76 +1,69 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../../front-aws-main/src/services/api';
 
-const ProductsPage = () => {
-  const [products, setProducts] = useState([]);
+const UserPage = () => {
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({ nome: '', preco: '', estoque: '' });
+  const [formData, setFormData] = useState({ nome: '', email: '' });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
 
-  const fetchProducts = async () => {
+  // Fetch users
+  const fetchUsers = async () => {
     try {
-      const response = await api.get('/produtos');
-      setProducts(response.data);
+      const response = await api.get('usuarios');
+      setUsers(response.data);
       setLoading(false);
     } catch (err) {
-      setError('Erro ao carregar produtos');
-      console.error(err);
+      setError('Erro ao carregar usuários');
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProducts();
+    fetchUsers();
   }, []);
 
+  // Create/Update user
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
-        await api.put(`/produtos/${editingId}`, formData);
+        await api.put(`usuarios/${editingId}`, formData);
       } else {
-        await api.post('/produtos', formData);
+        await api.post('usuarios', formData);
       }
-      setFormData({ nome: '', preco: '', estoque: '' });
+      setFormData({ nome: '', email: '' });
       setEditingId(null);
-      await fetchProducts();
+      fetchUsers();
     } catch (err) {
-      setError(editingId ? 'Erro ao atualizar produto' : 'Erro ao criar produto');
-      console.error(err);
+      setError(editingId ? 'Erro ao atualizar usuário' : 'Erro ao criar usuário');
     }
   };
 
+  // Delete user
   const handleDelete = async (id) => {
-    if (window.confirm('Tem certeza que deseja deletar este produto?')) {
+    if (window.confirm('Tem certeza que deseja deletar este usuário?')) {
       try {
-        await api.delete(`/produtos/${id}`);
-        await fetchProducts();
+        await api.delete(`usuarios/${id}`);
+        fetchUsers();
       } catch (err) {
-        setError('Erro ao deletar produto');
-        console.error(err);
+        setError('Erro ao deletar usuário');
       }
     }
   };
 
-  const handleEdit = (product) => {
-    setFormData({
-      nome: product.nome,
-      preco: product.preco,
-      estoque: product.estoque
-    });
-    setEditingId(product.id);
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setFormData({ nome: '', preco: '', estoque: '' });
+  // Edit user
+  const handleEdit = (user) => {
+    setFormData({ nome: user.nome, email: user.email });
+    setEditingId(user._id);
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-32">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+        <span className="ml-4 text-blue-700 font-semibold">Carregando...</span>
       </div>
     );
   }
@@ -83,12 +76,12 @@ const ProductsPage = () => {
         </div>
       )}
 
+      {/* Form */}
       <form onSubmit={handleSubmit} className="mb-8 bg-white shadow-md rounded px-8 pt-6 pb-8">
-        <h2 className="text-2xl mb-4">{editingId ? 'Editar Produto' : 'Novo Produto'}</h2>
-        
+        <h2 className="text-2xl mb-4">{editingId ? 'Editar Usuário' : 'Criar Usuário'}</h2>
         <div className="mb-4">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nome">
-            Nome do Produto
+            Nome
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
@@ -99,36 +92,19 @@ const ProductsPage = () => {
             required
           />
         </div>
-
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="preco">
-            Preço
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            Email
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-            id="preco"
-            type="number"
-            step="0.01"
-            value={formData.preco}
-            onChange={(e) => setFormData({ ...formData, preco: e.target.value })}
+            id="email"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
         </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="estoque">
-            Estoque
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-            id="estoque"
-            type="number"
-            value={formData.estoque}
-            onChange={(e) => setFormData({ ...formData, estoque: e.target.value })}
-            required
-          />
-        </div>
-
         <div className="flex items-center justify-between">
           <button
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -140,7 +116,10 @@ const ProductsPage = () => {
             <button
               className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
               type="button"
-              onClick={handleCancel}
+              onClick={() => {
+                setEditingId(null);
+                setFormData({ nome: '', email: '' });
+              }}
             >
               Cancelar
             </button>
@@ -148,31 +127,30 @@ const ProductsPage = () => {
         </div>
       </form>
 
+      {/* Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-blue-600 text-white">
               <th className="py-3 px-4 text-left">Nome</th>
-              <th className="py-3 px-4 text-left">Preço</th>
-              <th className="py-3 px-4 text-left">Estoque</th>
+              <th className="py-3 px-4 text-left">Email</th>
               <th className="py-3 px-4 text-left">Ações</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product) => (
-              <tr key={product.id} className="hover:bg-blue-50 transition-colors">
-                <td className="py-2 px-4">{product.nome}</td>
-                <td className="py-2 px-4">R$ {Number(product.preco).toFixed(2)}</td>
-                <td className="py-2 px-4">{product.estoque}</td>
+            {users.map((user) => (
+              <tr key={user._id} className="hover:bg-blue-50 transition-colors">
+                <td className="py-2 px-4">{user.nome}</td>
+                <td className="py-2 px-4">{user.email}</td>
                 <td className="py-2 px-4">
                   <button
-                    onClick={() => handleEdit(product)}
+                    onClick={() => handleEdit(user)}
                     className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-1 px-3 rounded mr-2"
                   >
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDelete(product.id)}
+                    onClick={() => handleDelete(user._id)}
                     className="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-3 rounded"
                   >
                     Deletar
@@ -187,4 +165,4 @@ const ProductsPage = () => {
   );
 };
 
-export default ProductsPage;
+export default UserPage;

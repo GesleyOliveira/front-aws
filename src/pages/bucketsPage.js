@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import api from '../../front-aws-main/src/services/api';
 
 const BucketsPage = () => {
   const [buckets, setBuckets] = useState([]);
